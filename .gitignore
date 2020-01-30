@@ -1,0 +1,6 @@
+# Ignore the client secrets file 
+client_secret.json
+
+.DS_Store
+/.vscode
+/.idea
