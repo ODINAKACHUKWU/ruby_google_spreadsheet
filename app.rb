@@ -1,6 +1,7 @@
 require "bundler"
-require_relative "models/worksheet.rb"
-require_relative "models/session.rb"
+require_relative "models/worksheet"
+require_relative "models/session"
+require_relative "models/user_details"
 
 Bundler.require
 
@@ -9,17 +10,21 @@ get "/" do
 end
 
 post "/" do
-  new_row = [params["name"], params["email"], params["phone_number"]]
-  begin
-    session = Session.new.session
-    worksheet = Worksheet.new(session).worksheet
-    worksheet.insert_rows(worksheet.num_rows + 1, [new_row])
-    worksheet.save
-    erb :thanks
-  rescue Exception => e
-    puts e.full_message
-    erb :index, locals: {
-      error_message: "Your details could not be saved, please try again."
-    }
+  user_details = UserDetails.new(params["name"], params["email"], params["phone_number"])
+  if user_details.valid?
+    begin
+      session = Session.new.session
+      worksheet = Worksheet.new(session).worksheet
+      worksheet.insert_rows(worksheet.num_rows + 1, [user_details.to_row])
+      worksheet.save
+      erb :thanks
+    rescue Exception => e
+      puts e.full_message
+      erb :index, locals: {
+                    error_message: "Your details could not be saved, please try again.",
+                  }
+    end
+  else
+    erb :index
   end
 end
